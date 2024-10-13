@@ -2,16 +2,19 @@
   <div id="wrap">
     <div class="container">
       <MainView />
+      <SubView />
     </div>
   </div>
 </template>
 
 <script>
 import MainView from '../components/MainView.vue';
+import SubView from '../components/SubView.vue';
 
 export default {
   components: {
-    MainView
+    MainView,
+    SubView,
   }
 };
 </script>
@@ -22,7 +25,7 @@ export default {
   #wrap{
     @include center;
     width: 100%;
-    height: 100vw;
+    height: 100vh;
   }
   .container{
     @include center-sb;
