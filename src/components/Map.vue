@@ -9,27 +9,28 @@ import axios from "axios";
 
 export default {
   mounted() {
-    // const API_KEY = '303b21dafb83e6b358335588ebd96514';
+    const API_KEY = '9c479056fe4cf3624aa3a5ad2eb922b1';
 
     if (window.kakao && window.kakao.maps) {
       this.initMap();
     } else {
       const script = document.createElement('script');
       /* global kakao */
-      script.onload = () => kakao.maps.load(this.initMap);
+      script.onload = () => kakao.maps.load(() => this.initMap());
       script.src = `http://dapi.kakao.com/v2/maps/sdk.js?autoload=false&appkey=${API_KEY}`;
       document.head.appendChild(script);
     }
   },
   methods: {
     initMap() {
-      const mapContainer = document.getElementById('map'); // 지도를 표시할 div
-      const mapOption = {
-        center: new kakao.maps.LatLng(36.73035, 127.967487), // 지도의 중심좌표
-        level: 13, // 지도의 확대 레벨
+      var mapContainer = document.getElementById('map'), // 지도를 표시할 div
+      mapOption = {
+          center: new kakao.maps.LatLng(36.73035, 127.967487), // 지도의 중심좌표
+          level: 13, // 지도의 확대 레벨
       };
-      const map = new kakao.maps.Map(mapContainer, mapOption);
-      const positions = [
+      var map = new kakao.maps.Map(mapContainer, mapOption);
+
+      var positions = [
         {
           "label": "서울",
           "latlng": [37.5683, 126.9778],
@@ -100,7 +101,7 @@ export default {
       // 마커를 생성합니다.
       positions.forEach((pos) => {
         const marker = new kakao.maps.Marker({
-          position: pos.latlng, // 마커의 위치
+          position: new kakao.maps.LatLng(pos.latlng[0], pos.latlng[1]), // 올바른 위치 설정
         });
         // 마커가 지도 위에 표시되도록 설정합니다
         marker.setMap(map);
@@ -116,18 +117,6 @@ export default {
       });
     },
   },
-  create(){
-    // 초기 데이터 선언을 위한 코드 작성
-    const API_KEY = "303b21dafb83e6b358335588ebd96514";
-    let initialLat = 36.5683;
-    let initialLon = 126.9778;
-
-    // get() 메서드를 통해서 우리가 필요로하는 API 데이터를 호출한다.
-    axios.get( `http://dapi.kakao.com/v2/maps/sdk.js?autoload=false&appkey=${API_KEY}`)
-    .then(response => {
-      console.log(response);
-    });
-  }
 };
 </script>
 

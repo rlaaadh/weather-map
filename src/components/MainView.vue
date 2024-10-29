@@ -296,7 +296,6 @@ export default {
               &.time{
                 font-size:0.8rem;
                 font-weight:200;
-                margin-bottom:7.5px;
 
                 &.currentDegree{
                   font-size:1.2rem;
@@ -315,7 +314,7 @@ export default {
               }
 
               .fall{
-                font-size:.0.9rem;
+                font-size:0.9rem;
                 margin-top:1.5px;
               }
             }
