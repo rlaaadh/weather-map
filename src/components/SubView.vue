@@ -59,8 +59,7 @@ export default {
 @import "~/scss/main.scss";
 
 .rightContainer {
-    width:324px;
-    min-width:324px;
+    width:350px;
     height:700px;
     border-radius:50px;
     background:linear-gradient(#cb0000, #0e1239);

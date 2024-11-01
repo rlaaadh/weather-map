@@ -29,9 +29,9 @@ export default {
   }
   .container{
     @include center-sb;
-    width: 55%;
     height: 90%;
     max-width: 1920px;
     max-height: 1354px;
+    gap:50px;
   }
 </style>

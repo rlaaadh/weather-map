@@ -2,8 +2,8 @@
   <div class="leftContainer">
     <div id="cityNameBox">
       <div class="cityName">
-        <p>San Fransisco</p>
-        <p>Jan 28</p>
+        <p>{{ cityName }}</p>
+        <p>{{ currentTime }}</p>
       </div>
     </div>
     <div id="contentsBox">
@@ -15,7 +15,7 @@
       </div>
       <div class="weatherBox">
         <div class="weatherDegree">
-          <p>10&deg;</p>
+          <p>{{Math.round(currentTemp)}}&deg;</p>
         </div>
         <div class="weatherIcon">
           <img src="~/assets/images/43.png" alt="MainLogo"/>
@@ -34,16 +34,16 @@
         <p>이번주 날씨 정보</p>
       </div>
       <div class="timelyWeatherBox">
-      <div class="timelyWeather">
+      <div class="timelyWeather" v-for="(temp, index) in arrayTemps" :key="index">
         <div class="icon">
           <img src="~/assets/images/29.png" alt="">
         </div>
         <div class="data">
-          <p class="time">2pm</p>
-          <p class="currentDegree">32&deg;</p>
+          <p class="time">{{ Unix_timestamp }}시</p>
+          <p class="currentDegree">{{ temp.temp }}&deg;</p>
           <div>
             <img src="~/assets/images/drop.png" alt=""/>
-            <p class="fall">15%</p>
+            <p class="fall">{{ temp.humidity }}%</p>
           </div>
         </div>
       </div>
@@ -60,24 +60,76 @@
 </template>
 
 <script>
+import axios from 'axios';
+import dayjs from 'dayjs';
+import "dayjs/locale/ko";
+dayjs.locale("ko"); // global로 한국이 locale 사용
+
 export default {
   data(){
     return {
+      // 현재 시간을 나타내기 위한 Dayjs 플러그인 사용
+      currentTime : dayjs().format("YYYY. MM. DD. ddd"),
+      // 상세 날씨 데이터를 받아주는 데이터 할당
+      currentTemp: [],
+      arrayTemps: [],
+      icons: [],
+      cityName: "",
+      
+
       // 임시 데이터
       TemporaryData:[
         {
-          'title':'습도',
-          'value':'88%'
+          title:"습도",
+          value:""
         },
         {
-          'title':'풍속',
-          'value':'10m/s'
+          title:"풍속",
+          value:""
         },
         {
-          'title':'풍향',
-          'value':'WS'
+          title:"체감온도",
+          value:""
         },
       ]
+    }
+  },
+  created(){
+    // 초기데이터 선언을 위한 코드 작성
+    // https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lon}&appid={API key}
+    const API_KEY = "303b21dafb83e6b358335588ebd96514";
+    let initialLat = 37.5683;
+    let initialLon = 126.9778;
+
+    axios
+    .get(`https://api.openweathermap.org/data/3.0/onecall?lat=${initialLat}&lon=${initialLon}&appid=${API_KEY}&units=metric`)
+    .then(response => {
+      console.log(response);
+      let initialCityName = response.data.timezone;
+      this.cityName = initialCityName.split("/")[1]; // ['aisa', 'seoul']
+      let initialCurrentWeatherData = response.data.current;
+
+      this.currentTemp= initialCurrentWeatherData.temp; // 현재 시간에 따른 현재 온도
+      
+      this.TemporaryData[0].value = initialCurrentWeatherData.humidity + "%"; // 습도
+      this.TemporaryData[1].value = initialCurrentWeatherData.wind_speed + "m/s"; // 풍속
+      this.TemporaryData[2].value = Math.round(initialCurrentWeatherData.feels_like) + "도"; // 체감온도
+
+      // 시간대별 날씨 데이터 (24시간 이내의 데이터만 활용할 것이기 때문에 for문을 활용)
+      for(let i=0; i <24; i++){
+        this.arrayTemps[i] = response.data.hourly[i];
+      }
+    })
+    .catch(error => {
+      console.log(error);
+    })
+  },
+  methods: {
+    // 타임 스탬프로 변환
+    Unix_timestamp(){
+      let data = new Date(dt * 1000);
+      let hour = "0" + data.getHours();
+      return hour.substr(-2) + "시";
     }
   }
 }
@@ -87,10 +139,10 @@ export default {
 @import "~/scss/main.scss";
 
   .leftContainer{
-    width:324px;
+    width:350px;
     height:700px;
     border-radius:50px;
-    background:linear-gradient(#16455f), #0e1239;
+    background:linear-gradient(#16455f, #0e1239);
     box-shadow:5px 5px 10px gray;
 
     #cityNameBox{
@@ -265,13 +317,19 @@ export default {
         width:calc(100% - 70px);
         height:65%;
         padding:0 30px;
+        overflow-x: scroll;
 
         .timelyWeather{
           display:flex;
-          width:126px;
-          height:70px;
+          min-width:126px;
+          height:60px;
           background-color:#0989ff;
           border-radius:20px;
+          margin-left:15px;
+
+          &:first-child{
+            margin-left:0;
+          }
 
           .icon{
             @include center;
@@ -307,15 +365,14 @@ export default {
             div{
               @include center;
               width:100%;
-              height:33.33%;
+              height:25%;
 
               img{
-                height:55%;
+                height:100%;
               }
 
               .fall{
                 font-size:0.9rem;
-                margin-top:1.5px;
               }
             }
           }
