@@ -39,7 +39,7 @@
           <img src="~/assets/images/29.png" alt="">
         </div>
         <div class="data">
-          <p class="time">{{ Unix_timestamp }}시</p>
+          <p class="time">{{ Unix_timestamp(temp.dt)}}</p>
           <p class="currentDegree">{{ temp.temp }}&deg;</p>
           <div>
             <img src="~/assets/images/drop.png" alt=""/>
@@ -104,7 +104,7 @@ export default {
     axios
     .get(`https://api.openweathermap.org/data/3.0/onecall?lat=${initialLat}&lon=${initialLon}&appid=${API_KEY}&units=metric`)
     .then(response => {
-      console.log(response);
+      // console.log(response);
       let initialCityName = response.data.timezone;
       this.cityName = initialCityName.split("/")[1]; // ['aisa', 'seoul']
       let initialCurrentWeatherData = response.data.current;
@@ -121,12 +121,12 @@ export default {
       }
     })
     .catch(error => {
-      console.log(error);
+      // console.log(error);
     })
   },
   methods: {
     // 타임 스탬프로 변환
-    Unix_timestamp(){
+    Unix_timestamp(dt){
       let data = new Date(dt * 1000);
       let hour = "0" + data.getHours();
       return hour.substr(-2) + "시";
@@ -319,6 +319,13 @@ export default {
         padding:0 30px;
         overflow-x: scroll;
 
+        -ms-overflow-style: none; // IE and Edge
+        scrollbar-width: none; // Firefox
+        &::-webkit-scrollbar{
+          // Chrome, Safari, Opera
+          display:none;
+        }
+
         .timelyWeather{
           display:flex;
           min-width:126px;
@@ -333,8 +340,9 @@ export default {
 
           .icon{
             @include center;
-            width:45%;
+            width:40%;
             height:100%;
+            padding-left:10%;
 
             img{
               width:100%;
@@ -342,16 +350,19 @@ export default {
           }
 
           .data{
-            @include c-center-se;
+            @include c-start-c;
             width:55%;
             height:100%;
+            padding-left: 5%;
 
             p{
               color:whitesmoke;
               font-family:'Popins', sans-serif;
               text-align:center;
+              margin-top: 4px;
 
               &.time{
+                margin-top:0;
                 font-size:0.8rem;
                 font-weight:200;
 
@@ -364,7 +375,6 @@ export default {
 
             div{
               @include center;
-              width:100%;
               height:25%;
 
               img{

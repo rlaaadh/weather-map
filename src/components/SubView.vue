@@ -2,8 +2,8 @@
   <div class="rightContainer">
     <div id="cityNameBox">
       <div class="cityName">
-        <p>San Fransisco</p>
-        <p>Jan 28</p>
+        <p>{{ cityName }}</p>
+        <p>{{ currentTime }}</p>
       </div>
     </div>
     <div id="contentsBox">
@@ -47,10 +47,53 @@
 
 <script>
 import Map from '~/components/Map.vue';
+import { ref } from 'vue';
+import dayjs from 'dayjs';
+import "dayjs/locale/ko";
+import axios from "axios";
+dayjs.locale("ko"); // global로 한국어 locale 사용
 
 export default {
   components:{
     Map,
+  },
+  //  Vue3 Composition API  사용
+  setup(){
+    // 화면에 보여질 데이터
+    let currentTime = dayjs().format("YYYY. MM. DD. ddd"); //  현재 시간
+    let cityName = ref(''); // 도시 이름
+    let feeling = ref(''); // 현재 온도에 대한 체감을 나타내는 데이터
+
+    // OpenWeatherAPI 호출 함수
+    const fetchOpenWeatherApi = async () => {
+      // API 호출을 위한 함수 데이터
+      const API_KEY = "303b21dafb83e6b358335588ebd96514";
+      let initialLat = 37.5683;
+      let initialLon = 126.9778;
+
+      try{
+        const res = await axios.get(
+          `https://api.openweathermap.org/data/3.0/onecall?lat=${initialLat}&lon=${initialLon}&appid=${API_KEY}&units=metric`
+          );
+
+          let isInitialData = res.data.current; // 초기 데이터
+          let isInitialCityName = res.data.timezone; // 초기 도시이름 데이터
+          let isFeelLikeTemp = isInitialData.feels_like; // 초기 체감온도 데이터
+          let isTimeOfSunrise = isInitialData.sunrise; // 일출시간 데이터
+          let isTimeOfSunset = isInitialData.sunset; // 일몰시간 데이터
+          let isLineOfSight = isInitialData.visiblity; // 가시거리 데이터
+
+          // Composition API에서 AJAX요청과 데이터 변경을 하려면 데이터.value로 접근해야한다.
+          cityName.value = isInitialCityName.split("/")[1];;
+      }catch (error){}
+    };
+
+    // 함수 호출
+    fetchOpenWeatherApi();
+
+    return{
+      currentTime,
+    }
   }
 };
 </script>
