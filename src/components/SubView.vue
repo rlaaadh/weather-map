@@ -15,23 +15,21 @@
       </div>
       <div class="weatherBox">
         <div class="airCondition">
-          <p>매우 추움</p>
+            <p>{{ feeling }}</p>
         </div>
         <div class="detail">
-          <div class="title">
-            <p>Detail Temperatures</p>
-          </div>
-          <div class="data">
+            <div class="title">
+                <p>🌈상세 날씨 데이터🌞</p>
+            </div>
+            <div class="data" v-for="(detailData, index) in subWeatherData" :key="index">
             <div class="dataName">
-              <p></p>
-              <p></p>
+                <span class="dot"></span>
+                <p>{{ detailData.name }}</p>
             </div>
             <div class="dataValue">
-              <p>
-                <span></span> &deg;
-              </p>
+                <p>{{ detailData.value }}<span></span></p>
             </div>
-          </div>
+        </div>
         </div>
       </div>
     </div>
@@ -47,7 +45,7 @@
 
 <script>
 import Map from '~/components/Map.vue';
-import { ref } from 'vue';
+import { onUnmounted, ref } from 'vue';
 import dayjs from 'dayjs';
 import "dayjs/locale/ko";
 import axios from "axios";
@@ -63,6 +61,16 @@ export default {
     let currentTime = dayjs().format("YYYY. MM. DD. ddd"); //  현재 시간
     let cityName = ref(''); // 도시 이름
     let feeling = ref(''); // 현재 온도에 대한 체감을 나타내는 데이터
+    let subWeatherData = ref([]); // 상세 날씨 데이터
+
+    // 타임스탬프로 변환
+    const Unix_timestamp = (dt) => {
+            let date = new Date(dt * 1000);
+            // padStart() 메서드는 현재 문자열의 시작을 다른 문자열로 채워, 주어진 길이를 만족하는 새로운 문자열을 반환
+            // 채워넣기는 대상 문자열의 시작(좌측)부터 적용됨
+            let hour = date.getHours().toString().padStart(2, '0');
+            return hour.substring(-2) + '시';
+        };
 
     // OpenWeatherAPI 호출 함수
     const fetchOpenWeatherApi = async () => {
@@ -80,11 +88,30 @@ export default {
           let isInitialCityName = res.data.timezone; // 초기 도시이름 데이터
           let isFeelLikeTemp = isInitialData.feels_like; // 초기 체감온도 데이터
           let isTimeOfSunrise = isInitialData.sunrise; // 일출시간 데이터
-          let isTimeOfSunset = isInitialData.sunset; // 일몰시간 데이터
-          let isLineOfSight = isInitialData.visiblity; // 가시거리 데이터
+          let isTimeOfSunset = isInitialData.sunset;  // 일몰시간 데이터
+          let isLineOfSight = isInitialData.visibility; // 가시거리 데이터
 
-          // Composition API에서 AJAX요청과 데이터 변경을 하려면 데이터.value로 접근해야한다.
-          cityName.value = isInitialCityName.split("/")[1];;
+          const tempPoints = [0, 10, 15, 20, 25, 30];
+          const lavels = ["매우추움", "추움", "쌀쌀함", "선선함", "보통", "더움", "매우 더움"];
+
+          // 가공할  or 가공한 데이터를 가지고 새로운 배열을 생성
+          // 우리가 새로은 배열을 만들어주는 이유는 template 부분에서 v-for를 좀 더 편하게 쓰기 위해서
+          const isProcessedData = [
+            { name: '일출시간', value: Unix_timestamp(isTimeOfSunrise) },
+            {
+                name: '일몰시간',
+                value: Unix_timestamp(isTimeOfSunset),
+            },
+            {
+                name: '가시거리',
+                value: isLineOfSight.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ',') + 'M'
+            },
+        ];
+
+          // Composition API에서 AJAX 요청과 데이터 변경을 하려면 데이터.value로 접근해야 한다.
+          cityName.value = isInitialCityName.split("/")[1];
+          subWeatherData.value = isProcessedData;
+
       }catch (error){}
     };
 
@@ -93,6 +120,9 @@ export default {
 
     return{
       currentTime,
+      cityName,
+      subWeatherData,
+      feeling,
     }
   }
 };
@@ -191,63 +221,63 @@ export default {
                 }
             }
             .detail {
-                width:100%;
-                height:65%;
+                width: 100%;
+                height: 65%;
 
                 .title {
                     @include center;
-                    width:100%;
-                    height:25%;
-                    color:white;
+                    width: 100%;
+                    height: 25%;
+                    color: white;
 
                     p {
-                        font-family:'LeferiPoint-WhiteObliqueA';
+                        font-family: 'LeferiPoint-WhiteObliqueA';
                     }
                 }
                 .data {
-                    display:flex;
-                    width:100%;
-                    height:27.5%;
+                    display: flex;
+                    width: 100%;
+                    height: 27.5%;
+                    // background-color: rgb(187, 127, 255);
 
                     .dataName {
-                        display:flex;
-                        align-items:center;
-                        width:50%;
-                        height:100%;
-                        font-family:'LeferiPoint-WhiteObliqueA';
+                        display: flex;
+                        align-items: center;
+                        width: 50%;
+                        height: 100%;
+                        font-family: 'LeferiPoint-WhiteObliqueA';
+
+                        .dot{
+                          display: block;
+                          width: 10px;
+                          height: 10px;
+                          border-radius: 50%;
+                          background-color: #ffde23;
+                          margin-left: 50px;
+                        }
 
                         p {
-                            &:first-child {
-                                display:block;
-                                width:10px;
-                                height:10px;
-                                border-radius:50%;
-                                background-color:#ffde23;
-                                margin-left:50px;
-                            }
-                            &:last-child {
-                                margin-left:10px;
-                                color:white;
-                                font-weight:300;
-                                font-size:0.9rem;
-                            }
+                          margin-left: 10px;
+                          color: white;
+                          font-weight: 300;
+                          font-size: 0.9rem;
                         }
                     }
                     .dataValue {
-                        display:flex;
-                        align-items:center;
-                        justify-content:right;
-                        width:50%;
-                        height:100%;
-                        font-family:'LeferiPoint-WhiteObliqueA';
+                        display: flex;
+                        align-items: center;
+                        justify-content: right;
+                        width: 50%;
+                        height: 100%;
+                        font-family: 'LeferiPoint-WhiteObliqueA';
 
                         p {
-                            color:white;
-                            font-weight:300;
-                            margin-right:50px;
+                            color: white;
+                            font-weight: 300;
+                            margin-right: 50px;
 
                             span {
-                                font-weight:600;
+                                font-weight: 600;
                             }
                         }
                     }
