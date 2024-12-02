@@ -19,7 +19,7 @@
         </div>
         <div class="detail">
             <div class="title">
-                <p>🌈상세 날씨 데이터🌞</p>
+                <p>🌈 상세 날씨 🌈 </p>
             </div>
             <div class="data" v-for="(detailData, index) in subWeatherData" :key="index">
             <div class="dataName">
@@ -65,12 +65,12 @@ export default {
 
     // 타임스탬프로 변환
     const Unix_timestamp = (dt) => {
-            let date = new Date(dt * 1000);
-            // padStart() 메서드는 현재 문자열의 시작을 다른 문자열로 채워, 주어진 길이를 만족하는 새로운 문자열을 반환
-            // 채워넣기는 대상 문자열의 시작(좌측)부터 적용됨
-            let hour = date.getHours().toString().padStart(2, '0');
-            return hour.substring(-2) + '시';
-        };
+        let date = new Date(dt * 1000);
+        // padStart() 메서드는 현재 문자열의 시작을 다른 문자열로 채워, 주어진 길이를 만족하는 새로운 문자열을 반환
+        // 채워넣기는 대상 문자열의 시작(좌측)부터 적용됨
+        let hour = date.getHours().toString().padStart(2, '0');
+        return hour.substring(-2) + '시';
+    };
 
     // OpenWeatherAPI 호출 함수
     const fetchOpenWeatherApi = async () => {
@@ -92,12 +92,22 @@ export default {
           let isLineOfSight = isInitialData.visibility; // 가시거리 데이터
 
           const tempPoints = [0, 10, 15, 20, 25, 30];
-          const lavels = ["매우추움", "추움", "쌀쌀함", "선선함", "보통", "더움", "매우 더움"];
+          const lavels = ["매우 추움", "추움", "쌀쌀함", "선선함", "보통", "더움", "매우 더움"];
+
+          let index = 0;
+          for(const point of tempPoints){
+            if(isFeelLikeTemp <= point) break;
+            index++;
+          }
+          feeling.value = lavels[index];
 
           // 가공할  or 가공한 데이터를 가지고 새로운 배열을 생성
           // 우리가 새로은 배열을 만들어주는 이유는 template 부분에서 v-for를 좀 더 편하게 쓰기 위해서
           const isProcessedData = [
-            { name: '일출시간', value: Unix_timestamp(isTimeOfSunrise) },
+            { 
+              name: '일출시간', 
+              value: Unix_timestamp(isTimeOfSunrise) 
+            },
             {
                 name: '일몰시간',
                 value: Unix_timestamp(isTimeOfSunset),

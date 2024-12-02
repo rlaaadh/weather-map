@@ -127,9 +127,9 @@ export default {
   methods: {
     // 타임 스탬프로 변환
     Unix_timestamp(dt){
-      let data = new Date(dt * 1000);
-      let hour = "0" + data.getHours();
-      return hour.substr(-2) + "시";
+      let date = new Date(dt * 1000);
+      let hour = date.getHours().toString().padStart(2, '0');
+      return hour.substring(-2) + "시";
     }
   }
 }
