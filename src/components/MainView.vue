@@ -94,35 +94,53 @@ export default {
       ]
     }
   },
-  created(){
-    // 초기데이터 선언을 위한 코드 작성
-    // https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lon}&appid={API key}
-    const API_KEY = "303b21dafb83e6b358335588ebd96514";
-    let initialLat = 37.5683;
-    let initialLon = 126.9778;
-
-    axios
-    .get(`https://api.openweathermap.org/data/3.0/onecall?lat=${initialLat}&lon=${initialLon}&appid=${API_KEY}&units=metric`)
-    .then(response => {
-      // console.log(response);
-      let initialCityName = response.data.timezone;
-      this.cityName = initialCityName.split("/")[1]; // ['aisa', 'seoul']
-      let initialCurrentWeatherData = response.data.current;
-
-      this.currentTemp= initialCurrentWeatherData.temp; // 현재 시간에 따른 현재 온도
-      
-      this.TemporaryData[0].value = initialCurrentWeatherData.humidity + "%"; // 습도
-      this.TemporaryData[1].value = initialCurrentWeatherData.wind_speed + "m/s"; // 풍속
-      this.TemporaryData[2].value = Math.round(initialCurrentWeatherData.feels_like) + "도"; // 체감온도
-
-      // 시간대별 날씨 데이터 (24시간 이내의 데이터만 활용할 것이기 때문에 for문을 활용)
-      for(let i=0; i <24; i++){
-        this.arrayTemps[i] = response.data.hourly[i];
-      }
-    })
-    .catch(error => {
-      // console.log(error);
-    })
+  async created(){
+    // 초기데이터 선언을 위하 코드 작성
+    // Vuex Store의 Mutations를 호출할 때는 commit() 메서드를 사용한다.
+    // Vuex Store의 Actions를 호출할 때는 dispach() 메서드를 사용한다.
+    await this.$store.dispach('openWeatherApi/FETCH_OPENWEATHER_API'); // Vuex Store에 선언된 api 호출 완료
+    const { currentTemp, currentHumudity, currentWindSpeed, currentFeelsLike } = this.$store.state.openWeatherApi.currentWeather;
+    this.currentTemp = currentTemp;
+    this.temporaryData[0].value = currentHumudity + "%";
+    this.temporaryData[1].value = currentWindSpeed + "m/s";
+    this.temporaryData[2].value = Math.round(currentFeelsLike) + "도";
+    this.arrayTemps = this.$store.state.openWeatherApi.hourlyWeather;
+    this.arrayTemps = this.$store.state.openWeatherApi.imagePath;
+  },
+  computed: {
+    // 마커를 선택했을 때, 레이아웃에 보여지는 도시이름
+    cityName() {
+      return this.$store.state.openWeatherApi.cityName;
+    },
+    // 현재 시간에 따른 현재온도 데이터
+    currentTemp(){
+      const { currentTemp } = this.$store.state.openWeatherApi.currentWeather;
+      return currentTemp;
+    },
+    arrayTemps(){
+      return this.$store.state.openWeatherApi.hourlyWeather;
+    },
+    temporaryData(){
+      const { currentHumidity, currentWindSpeed, currentFeelsLike } = this.$store.state.openWeatherApi.currentWeather;
+      return [
+        {
+          title: "습도",
+          value: currentHumidity + "%",
+        },
+        {
+          title: "풍속",
+          value: currentWindSpeed + "m/s",
+        },
+        {
+          title: "체감온도",
+          value: Math.round(currentFeelsLike) + "도",
+        },
+      ];
+    },
+    // 시간별 날씨 데이터에 따른 아이콘 이미지
+    image() {
+      return this.$store.state.openWeatherApi.image;
+    }
   },
   methods: {
     // 타임 스탬프로 변환
@@ -130,9 +148,9 @@ export default {
       let date = new Date(dt * 1000);
       let hour = date.getHours().toString().padStart(2, '0');
       return hour.substring(-2) + "시";
-    }
-  }
-}
+    },
+  },
+};
 </script>
 
 <style lang="scss" scoped>

@@ -9,8 +9,8 @@ export default {
     currentWeather: {
       // MainView.vue에서 사용
       currentTemp: 0,
-      currentHumidity: 0,
-      currentWindSpped: 0,
+      currentHumidity: 0, 
+      currentWindSpeed: 0,
       currentFeelsLike: 0,
 
       // Subview.vue에서 사용
@@ -33,9 +33,9 @@ export default {
   // 위 사항이 가장 주의해야 할 사항이고, 비동기로 동작한다는 점도 유의하자.
   actions: {
     // context라는 객체 데이터를 호출하여, context를 참조하여 데이터를 불러온다.
-    //  context 안에는 state, getters, mutations를 활용할 수 있는 내용이 들어있다.
+    // context 안에는 state, getters, mutations를 활용할 수 있는 내용이 들어있다.
     // mutations를 호출하기 위해서는 context.mutations가 아니라 context.commit("뮤테이션 이름", payload) 형식으로 호출해야한다.
-    //  객체 구조분해하여 불러올 수도 있다.
+    // 객체 구조분해하여 불러올 수도 있다.
 
     // OPENWEATHERAPI 데이터 호출
     async FETCH_OPENWEATHER_API(context) {
@@ -54,7 +54,7 @@ export default {
         const images = new Array();
         for(let i = 0; i < 48; i++){
           const weatherIcon = res.data.hourly[i].weather[0].icon;
-          images[i] = `src/images/${weatherIcon}.png`;
+          images[i] = `src/assets/images/${weatherIcon}.png`;
         }
       } catch(error){
         console.log(error);
